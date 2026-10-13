@@ -113,6 +113,13 @@ python manage.py migrate
 ```bash
 python manage.py runserver
 ```
+После запуска сервера нужно добавить порт 8000 и сделать его публичным.
+
+### 7. Запуск бота
+
+```bash
+python bot.py
+```
 
 ##  Как работает ИИ
 
