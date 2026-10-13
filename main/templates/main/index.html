@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовый Ассистент</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #fff0f7, #eef2ff);
+            color: #25213b;
+        }
+        button {
+            cursor: pointer;
+        }
+        .header {
+            padding: 15px;
+            text-align: center;
+        }
+        .header h3 {
+            margin: 0;
+            color: #7c3aed;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e9d5ff;
+        }
+        .tab-button {
+            width: 50%;
+            padding: 12px;
+            border: 0;
+            background: none;
+            color: #9ca3af;
+            font-size: 15px;
+        }
+        .tab-button.active {
+            color: #ec4899;
+            border-bottom: 3px solid #ec4899;
+        }
+        .section {
+            display: none;
+            padding: 15px;
+        }
+        .section.active {
+            display: block;
+        }
+        .period-buttons {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            margin: 15px 0 10px;
+        }
+        .period-button {
+            flex-shrink: 0;
+            padding: 8px 12px;
+            border: 0;
+            border-radius: 15px;
+            background: #ffffffcc;
+            color: #6b5b95;
+            box-shadow: 0 3px 10px #d8b4fe55;
+        }
+        .period-button.active {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: #fff;
+        }
+        .custom-period {
+            display: none;
+            gap: 8px;
+            align-items: end;
+            margin: 10px 0 20px;
+        }
+        .custom-period div {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .custom-period input,
+        .custom-period button {
+            padding: 8px;
+            border: 0;
+            border-radius: 8px;
+        }
+        .custom-period input {
+            background: #fff;
+            box-shadow: 0 3px 10px #d8b4fe44;
+        }
+        .custom-period button {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: #fff;
+        }
+        .stats-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+            background: #ffffffaa;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .stats-table th,
+        .stats-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eadcff;
+            text-align: left;
+        }
+        .stats-table th {
+            color: #8b5cf6;
+            font-size: 14px;
+        }
+        .stats-table th:last-child,
+        .stats-table td:last-child {
+            text-align: right;
+        }
+        .stats-table td[colspan="2"] {
+            text-align: center;
+            color: #9ca3af;
+        }
+        .total-row {
+            font-weight: bold;
+            color: #ec4899;
+        }
+        .income-title {
+            margin-top: 30px;
+        }
+        .chat {
+            height: calc(100vh - 230px);
+            min-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 18px;
+            background: #ffffff99;
+            box-shadow: inset 0 0 20px #c4b5fd33;
+        }
+        .message {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        .message.user {
+            justify-content: flex-end;
+        }
+        .message-text {
+            max-width: 80%;
+            padding: 9px 12px;
+            border-radius: 14px;
+            font-size: 15px;
+            word-wrap: break-word;
+            box-shadow: 0 4px 12px #c084fc22;
+        }
+        .message.user .message-text {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .message.ai .message-text {
+            background: #fff;
+            border-bottom-left-radius: 4px;
+        }
+        .send-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .message-input {
+            flex: 1;
+            min-width: 0;
+            padding: 11px 13px;
+            border: 2px solid #e9d5ff;
+            border-radius: 20px;
+            outline: none;
+            background: #fff;
+            color: #25213b;
+            font-size: 15px;
+        }
+        .send-button {
+            width: 45px;
+            height: 45px;
+            border: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: #fff;
+            font-size: 18px;
+            box-shadow: 0 5px 15px #ec489955;
+        }
+        .error {
+            margin-top: 8px;
+            color: #ef4444;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h3>Финансовый ИИ</h3>
+    </div>
+    <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('stats')">
+            Статистика
+        </button>
+        <button class="tab-button" onclick="switchTab('chat')">
+            ИИ Чат
+        </button>
+    </div>
+
+    <div id="stats-section" class="section active">
+        <h3>Статистика</h3>
+        <div class="period-buttons">
+            <button class="period-button active" onclick="changePeriod('all', this)">
+                Всё время
+            </button>
+            <button class="period-button" onclick="changePeriod('today', this)">
+                Сегодня
+            </button>
+            <button class="period-button" onclick="changePeriod('week', this)">
+                Неделя
+            </button>
+            <button class="period-button" onclick="changePeriod('month', this)">
+                Месяц
+            </button>
+            <button class="period-button" onclick="changePeriod('year', this)">
+                Год
+            </button>
+            <button class="period-button" onclick="changePeriod('custom', this)">
+                За период
+            </button>
+        </div>
+        <div id="custom-period" class="custom-period">
+            <div>
+                <label>От</label>
+                <input type="date" id="date-from">
+            </div>
+
+            <div>
+                <label>До</label>
+                <input type="date" id="date-to">
+            </div>
+
+            <button onclick="applyCustomPeriod()">
+                Показать
+            </button>
+        </div>
+
+        <h3>Расходы</h3>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Категория</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+
+            <tbody id="expenses-table">
+                <tr>
+                    <td colspan="2">Загрузка...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3 class="income-title">Доходы</h3>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Категория</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+
+            <tbody id="income-table">
+                <tr>
+                    <td colspan="2">Загрузка...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="chat-section" class="section">
+        <div class="chat" id="chat">
+            <div class="message ai">
+                <div class="message-text">
+                    Привет! Я помогу следить за твоими финансами.
+                </div>
+            </div>
+        </div>
+
+        <div class="send-box">
+            <input id="msg-input" class="message-input" type="text" placeholder="Напиши сообщение..."
+                autocomplete="off">
+
+            <button class="send-button" onclick="sendMessage()">
+                ➤
+            </button>
+        </div>
+        <div id="error" class="error"></div>
+    </div>
+    <script>
+        const tg = window.Telegram?.WebApp;
+
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+        const telegramId = tg?.initDataUnsafe?.user?.id;
+        function switchTab(tab) {
+            document.querySelectorAll(".section")
+                .forEach(x => x.classList.remove("active"));
+
+            document.querySelectorAll(".tab-button")
+                .forEach(x => x.classList.remove("active"));
+
+            const stats = tab === "stats";
+            document
+                .getElementById(stats ? "stats-section" : "chat-section")
+                .classList.add("active");
+            document
+                .querySelectorAll(".tab-button")[stats ? 0 : 1]
+                .classList.add("active");
+            if (stats) {
+                loadStatistics();
+            } else {
+                scrollChat();
+            }
+        }
+        const protocol =
+            location.protocol === "https:" ? "wss://" : "ws://";
+        const chatSocket =
+            new WebSocket(protocol + location.host + "/ws/chat/");
+        chatSocket.onmessage = event => {
+            const data = JSON.parse(event.data);
+            addMessage(data.message, "ai");
+            loadStatistics();
+            scrollChat();
+        };
+        chatSocket.onclose = () =>
+            showError("Нет соединения с сервером.");
+        function addMessage(text, type) {
+            const message = document.createElement("div");
+            message.className = "message " + type;
+            message.innerHTML =
+                `<div class="message-text">${text}</div>`;
+
+            document.getElementById("chat").appendChild(message);
+        }
+        function sendMessage() {
+            const input = document.getElementById("msg-input");
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (chatSocket.readyState !== WebSocket.OPEN) {
+                showError("Нет соединения с сервером.");
+                return;
+            }
+            if (!telegramId) {
+                showError("Не удалось определить пользователя Telegram.");
+                return;
+            }
+            addMessage(text, "user");
+
+            chatSocket.send(JSON.stringify({
+                message: text,
+                telegram_id: telegramId
+            }));
+
+            input.value = "";
+            input.focus();
+            scrollChat();
+        }
+        document.getElementById("msg-input").onkeydown = event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        };
+        function scrollChat() {
+            const chat = document.getElementById("chat");
+            chat.scrollTop = chat.scrollHeight;
+        }
+        let currentPeriod = "all";
+        function changePeriod(period, button) {
+            currentPeriod = period;
+            document.querySelectorAll(".period-button")
+                .forEach(x => x.classList.remove("active"));
+            button.classList.add("active");
+            const custom = document.getElementById("custom-period");
+            custom.style.display =
+                period === "custom" ? "flex" : "none";
+
+            if (period !== "custom") {
+                loadStatistics();
+            }
+        }
+        function applyCustomPeriod() {
+            const from = document.getElementById("date-from").value;
+            const to = document.getElementById("date-to").value;
+            if (!from || !to) {
+                showError("Выберите обе даты.");
+                return;
+            }
+            if (from > to) {
+                showError("Дата «От» позже даты «До».");
+                return;
+            }
+            loadStatistics();
+        }
+        async function loadStatistics() {
+            const expenses = document.getElementById("expenses-table");
+            const incomes = document.getElementById("income-table");
+            if (!telegramId) {
+                expenses.innerHTML =
+                    incomes.innerHTML =
+                    `<tr><td colspan="2">Пользователь не найден</td></tr>`;
+                return;
+            }
+            let url =
+                `/api/statistics/?telegram_id=${telegramId}&period=${currentPeriod}`;
+            if (currentPeriod === "custom") {
+                const from = document.getElementById("date-from").value;
+                const to = document.getElementById("date-to").value;
+                if (!from || !to) return;
+                url += `&date_from=${from}&date_to=${to}`;
+            }
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                renderStatistics(expenses, data.expenses);
+                renderStatistics(incomes, data.incomes);
+            } catch {
+                expenses.innerHTML =
+                    incomes.innerHTML =
+                    `<tr><td colspan="2">Ошибка загрузки</td></tr>`;
+            }
+        }
+        function renderStatistics(table, data) {
+            if (!data?.length) {
+                table.innerHTML =
+                    `<tr><td colspan="2">Нет данных</td></tr>`;
+                return;
+            }
+            let total = 0;
+            table.innerHTML = data.map(item => {
+                total += Number(item.amount);
+                return `
+                    <tr>
+                        <td>${item.category}</td>
+                        <td>${formatMoney(item.amount)} ₸</td>
+                    </tr>
+                `;
+            }).join("");
+
+            table.innerHTML += `
+                <tr class="total-row">
+                    <td>Всего</td>
+                    <td>${formatMoney(total)} ₸</td>
+                </tr>
+            `;
+        }
+        function formatMoney(number) {
+            return Number(number).toLocaleString("ru-RU", {
+                maximumFractionDigits: 2
+            });
+        }
+        loadStatistics();
+    </script>
+</body>
+</html>
