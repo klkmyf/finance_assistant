@@ -37,7 +37,7 @@ async def cmd_start(message: Message):
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(
-            text="Начать",
+            text="Начать ",
             web_app=WebAppInfo(url=WEBAPP_URL)
         )
     ]])

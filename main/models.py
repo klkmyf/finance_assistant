@@ -12,7 +12,6 @@ class UserProfile(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Название категории")
     
-    # is_custom = models.BooleanField(default=False, verbose_name="Кастомная категория") 
 
     def __str__(self):
         return self.name
