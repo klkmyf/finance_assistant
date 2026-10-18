@@ -9,7 +9,6 @@ from .models import UserProfile, Category, Transaction
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
-
     async def connect(self):
         await self.accept()
         print("WebSocket подключен!")
