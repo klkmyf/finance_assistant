@@ -33,19 +33,21 @@ Telegram Mini App для учёта личных финансов с интег�
 
 project/
 ├── config/
-│   └── settings.py
-│   └── routing.py
+│   └── settings.py  главный центр конфигураций проекта
+│   └── routing.py   маршрутизация WebSockets и асинхронных протоколов через Django Channels
 ├── main/
-│   ├── models.py
-│   ├── consumers.py
-│   ├── ai.py
-│   ├── prompt.py
-│   ├── bot.py
-│   └── views.py
-├── templates/index.html
-├── manage.py
-├── requirements.txt
-├── .env
+│   ├── models.py  описание структуры таблиц
+│   ├── consumers.py создан для работы с вебсокетами
+│   ├── ai.py   здесь настроено подключение и работа GROQ AI
+│   ├── prompt.py  создан для указаний и описания нужного поведения ии-ассистента
+│   ├── bot.py  точка входа для интерфейса нашего телеграм-бота
+│   ├── views.py  отдает интерфейс проекта
+│   └── templates
+│           └──index.html  вся фронтенд-часть проекта
+│
+├── manage.py  пульт управления проектом через терминал
+├── requirements.txt  необходимые зависимости
+├── .env   ключи
 └── README.md
 
 

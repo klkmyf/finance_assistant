@@ -12,12 +12,7 @@ from main.models import UserProfile
 from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
-from fastapi import FastAPI
 
-app = FastAPI() 
-@app.get("/")
-def read_root():
-    return {"status": "working"}
 
 
 load_dotenv() 
